@@ -1211,5 +1211,29 @@
     window.addEventListener('resize', fit);
   })();
 </script>
+
+<script>
+// open alerts to Inge's phone via ntfy (skipped for her own visits: open once with ?me)
+(function(){
+  try{
+    var T = 'https://ntfy.sh/sl-praxis-9e5e811b4e';
+    if(/[?&]me\b/.test(location.search)){ try{ localStorage.setItem('sl_me','1'); }catch(e){} }
+    var isMe = false; try{ isMe = localStorage.getItem('sl_me') === '1'; }catch(e){}
+    if(isMe || location.protocol === 'file:') return;
+    function ping(msg, tag){
+      try{ fetch(T + '?title=' + encodeURIComponent('Praxis proposal') + '&tags=' + tag, { method:'POST', body:msg, mode:'no-cors', keepalive:true }); }catch(e){}
+    }
+    var dev = /Mobi|Android|iPhone|iPad/i.test(navigator.userAgent) ? 'a phone' : 'a computer';
+    var t = new Date().toLocaleTimeString('en-AU', { timeZone:'Australia/Brisbane', hour:'numeric', minute:'2-digit' });
+    ping('Opened on ' + dev + ' at ' + t, 'eyes');
+    var inv = document.getElementById('investment'), sent = false;
+    if(inv && 'IntersectionObserver' in window){
+      new IntersectionObserver(function(es, o){
+        es.forEach(function(e){ if(e.isIntersecting && !sent){ sent = true; ping('Reached the Investment section', 'moneybag'); o.disconnect(); } });
+      }, { threshold:0.3 }).observe(inv);
+    }
+  }catch(e){}
+})();
+</script>
 </body>
 </html>
